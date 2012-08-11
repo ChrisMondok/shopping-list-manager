@@ -2,5 +2,11 @@ enyo.depends(
 	"$lib/layout",
 	"$lib/onyx",
 	"App.css",
-	"App.js"
+	"App.js",
+	"Main.js",
+	"ItemList.js",
+	"Product.js",
+	"DesiredProduct.js",
+	//"ProductDisplay.js",
+	"ResizableDrawer.js"
 );

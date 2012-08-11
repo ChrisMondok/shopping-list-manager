@@ -3,8 +3,28 @@
 	This way, you can minify your application, and just remove the "source" folder for production
 */
 #app {
-	margin: 16px;
-	border-radius: 4px;
-	background-color: silver;
-	padding: 16px;
+	background-color: #EAEAEA;
+}
+
+.itemName
+{
+	font-size:1.25em;
+}
+
+.itemDetails
+{
+	font-size:0.8em;
+	color:#0000FF;
+}
+
+.suggestionsDrawer
+{
+	background-color:rgba(0,0,0,0.25);
+	margin:0ex 0.6em;
+}
+
+input
+{
+	color:black;
+	background:white;
 }
