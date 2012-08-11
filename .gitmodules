@@ -4,3 +4,6 @@
 [submodule "lib/layout"]
 	path = lib/layout
 	url = https://github.com/enyojs/layout.git
+[submodule "lib/onyx"]
+	path = lib/onyx
+	url = https://github.com/ChrisMondok/onyx.git
