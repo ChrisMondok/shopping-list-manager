@@ -42,6 +42,8 @@ enyo.kind({
 		this.inherited(arguments);
 		this.createSampleData();
 		THIS = this;
+		if(enyo.platform.webos)
+			window.PalmSystem.stageReady();
 	},
 	create:function()
 	{
@@ -72,7 +74,7 @@ enyo.kind({
 		var filter = function(item,index,array)
 		{
 			var name = item.getProductName().toLowerCase();
-			return (name.indexOf(string.toLowerCase()) != -1);
+			return (name.indexOf(string.toLowerCase()) != -1 && name != string.toLowerCase());
 		}
 
 		if(string.indexOf(this.filterString) != 0)
@@ -110,14 +112,16 @@ enyo.kind({
 	},
 	addItem:function(inSender, inEvent)
 	{
+		var createProduct = function(item)
+		{
+			item = enyo.create({kind:"ShoppingListManager.Product",productName:this.$.NewItem.getValue()});
+			this.allItems.unshift(item);
+			this.allItemsChanged();
+		}
 		var found = false;
 		var item = this.getItemByName(this.$.NewItem.getValue());
 		if(!item)
-		{
-			item = enyo.create({kind:"ShoppingListManager.Product",productName:this.$.NewItem.getValue()});
-			this.allItems.push(item);
-			this.allItemsChanged();
-		}
+			createProduct(item);
 		this.$.NewItem.setValue("");
 		this.setFilterString("");
 		this.$.ItemList.addItem(item);

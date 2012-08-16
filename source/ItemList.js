@@ -3,8 +3,6 @@ enyo.kind({
 	kind:"FittableRows",
 	published:{
 		items:new Array(),
-		canAdd:true,
-		canDelete:true,
 		listKind:"ShoppingListManager.ProductDisplay",
 	},
 	events:{
@@ -14,20 +12,27 @@ enyo.kind({
 		onCartChanged:"handleCartChanged",
 	},
 	components:[
-		{kind:"FittableColumns", classes:"onyx-toolbar-inline", components:[
-			{name:"Progress", kind:onyx.ProgressBar, style:"height:0.5em", animateStripes:false, showStripes:false, fit:true},
-			{kind:onyx.Button, content:"Check out"},
-		]},
 		{name:"Scroller", kind:enyo.Scroller, fit:true, touch:true, components:[
 			{name:"List", kind:enyo.Repeater, fit:true, onSetupItem: "setupItem", components:[
 				{kind:onyx.Item, components:[
 					{kind:"FittableColumns", classes:"onyx-toolbar-inline", components:[
 						{name:"ItemName", content:"No product", fit:true, classes:"itemName"},
-						{name:"Details", content:"Details", classes:"itemDetails"},
+						{name:"Details", content:"", classes:"itemDetails"},
 						{name:"CheckboxContainer", showing:true, components:[
 							{name:"Checkbox", kind:onyx.Checkbox, onActivate:"checkChanged"},
 						]},
 					]},
+				]},
+			]},
+		]},
+		{kind:onyx.Groupbox, components:[
+			{kind:"FittableColumns", classes:"onyx-toolbar-inline", components:[
+				{fit:true, components:[
+					{name:"Progress", kind:onyx.ProgressBar, animateStripes:true, barClasses:"onyx-dark"},
+				]},
+				{kind:onyx.TooltipDecorator, components:[
+					{kind:onyx.Button, content:"Check out", onclick:"checkout"},
+					{kind:onyx.Tooltip, content:"Remove items in cart from list"},
 				]},
 			]},
 		]},
@@ -66,6 +71,14 @@ enyo.kind({
 		}
 		this.$.Progress.animateProgressTo(Math.floor((completed/this.items.length)*100));
 	},
+	getItemsInCart:function()
+	{
+		var checkedItems = new Array();
+		for(var i = 0; i < this.items.length; i++)
+			if(this.items[i].getInCart())
+				checkedItems.push(this.items[i]);
+		return checkedItems;
+	},
 	addItem:function(newItem)
 	{
 		var name = newItem.getProductName();
@@ -74,7 +87,7 @@ enyo.kind({
 		if(!item)
 		{
 			item = enyo.create({kind:"ShoppingListManager.DesiredProduct", product:newItem});
-			this.items.push(item);
+			this.items.unshift(item);
 			this.itemsChanged();
 		}
 		//Scroll to reveal item
@@ -86,6 +99,15 @@ enyo.kind({
 			this.$.Scroller.scrollTo(0,(ih/this.items.length) * itemIndex)
 		}
 	},
+	checkout:function()
+	{
+		var inCart = this.getItemsInCart();
+		this.promptAddItemsToStore(inCart);
+	},
+	promptAddItemsToStore:function(items)
+	{
+
+	}
 	getItemByName:function(name)
 	{
 		var items = this.getItems();
