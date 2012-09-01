@@ -107,7 +107,7 @@ enyo.kind({
 	promptAddItemsToStore:function(items)
 	{
 
-	}
+	},
 	getItemByName:function(name)
 	{
 		var items = this.getItems();

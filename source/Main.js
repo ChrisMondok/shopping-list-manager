@@ -40,18 +40,38 @@ enyo.kind({
 	rendered:function()
 	{
 		this.inherited(arguments);
-		this.createSampleData();
+		this.loadItemsFromStorage();
+		if(this.getAllItems().length == 0)
+			if(confirm("Create sample items?"))
+				this.createSampleData();
 		THIS = this;
-		if(enyo.platform.webos)
-			window.PalmSystem.stageReady();
 	},
 	create:function()
 	{
 		this.inherited(arguments);
 	},
+	saveAllItemsToStorage:function()
+	{
+		var serialized = new Array();
+		for (var item in this.allItems)
+			serialized.push(this.allItems[item].serialize());
+		ShoppingListManager.Storage.set("allItems",serialized);
+	},
+	loadItemsFromStorage:function()
+	{
+		var loadedItems = ShoppingListManager.Storage.get("allItems");
+		if(loadedItems)
+		{
+			var deserializedItems = new Array();
+			for (var item in loadedItems)
+				deserializedItems.push(ShoppingListManager.Product.deserialize(loadedItems[item]));
+			this.setAllItems(deserializedItems);
+		}
+	},
 	allItemsChanged:function()
 	{
 		this.resetSuggestions();
+		this.saveAllItemsToStorage();
 	},
 	resetSuggestions:function()
 	{
