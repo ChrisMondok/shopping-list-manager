@@ -5,7 +5,6 @@ enyo.kind({
 	published:{
 		allItems: [],
 		suggestions: [],
-		filterString: "",
 		keyTimer:null,
 	},
 	components:[
@@ -15,7 +14,7 @@ enyo.kind({
 			]},
 			{kind:onyx.Button, classes:"onyx-affirmative", content:"Add", onclick:"userAddItem"} 
 		]},
-		{name:"Drawer", kind:"ResizableDrawer", classes:"suggestionsDrawer", open:true, components:[
+		{name:"Drawer", kind:"ResizableDrawer", classes:"suggestionsDrawer", open:false, components:[
 			{name:"SuggestionsList", kind:enyo.Repeater, fit:true, onSetupItem: "renderSuggestions", components:[
 				{kind:onyx.Item, onclick:"useSuggestion", components:[
 					{name:"Suggestion"},
@@ -74,53 +73,33 @@ enyo.kind({
 	},
 	allItemsChanged:function()
 	{
-		this.resetSuggestions();
 		this.saveAllItemsToStorage();
-	},
-	resetSuggestions:function()
-	{
-		console.log("Suggestions reset");
-		var suggestions = new Array();
-		var items = this.getAllItems();
-		for(var itemId in items)
-			suggestions.push(items[itemId]);
-		this.setSuggestions(suggestions);
 	},
 	filterInputChanged:function(input, event)
 	{
 		if(this.getKeyTimer())
 			clearTimeout(this.getKeyTimer());
 		//I'd use a future here, but enyo 2 doesn't have those?
-		var t = setTimeout(function(){this.setFilterString(input.getValue())}.bind(this),500);
+		var t = setTimeout(this.updateSuggestions.bind(this),500);
 		this.setKeyTimer(t);
 	},
-	setFilterString:function(string)
+	updateSuggestions:function()
 	{
-		var needReset = false;
+		var unfiltered = [];
+		var items = this.getAllItems();
+		var string = this.$.NewItem.getValue();
+		for(var itemId in items)
+			unfiltered.push(items[itemId]);
 		var filter = function(item,index,array)
 		{
 			var name = item.getProductName().toLowerCase();
 			return (name.indexOf(string.toLowerCase()) != -1 && name != string.toLowerCase());
 		}
-
-		if(string.indexOf(this.getFilterString()) != 0)
-			needReset = true;
-
-		console.log("Setting filter string to \""+string+"\"");
-		this.filterString = string;
-		if(string.length && !needReset)
-		{
-			var suggestions = this.getSuggestions();
-			suggestions = suggestions.filter(filter,this);
-			this.setSuggestions(suggestions);
-		}
-		else
-			this.resetSuggestions();
+		this.setSuggestions(unfiltered.filter(filter,this));
 	},
 	suggestionsChanged:function()
 	{
-		console.log("Suggestions changed, string length is "+this.getFilterString().length);
-		if(this.getSuggestions().length && this.getFilterString().length)
+		if(this.getSuggestions().length && this.$.NewItem.getValue().length)
 		{
 			this.$.SuggestionsList.setCount(Math.min(5,this.getSuggestions().length));
 			this.$.Drawer.setOpen(true);
@@ -149,7 +128,7 @@ enyo.kind({
 		var itemName = this.$.NewItem.getValue()
 		var item = this.getOrCreateItemByName(itemName);
 		this.$.NewItem.setValue("");
-		this.setFilterString("");
+		this.updateSuggestions();
 		this.$.ItemList.addItem(item);
 	},
 	getOrCreateItemByName:function(itemName)
@@ -195,6 +174,6 @@ enyo.kind({
 	{
 		var index = inEvent.index;
 		this.$.NewItem.setValue(this.getSuggestions()[index].getProductName());
-		this.setFilterString(this.getSuggestions()[index].getProductName());
+		this.updateSuggestions();
 	}
 })

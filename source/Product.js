@@ -31,6 +31,5 @@ enyo.kind({
 		this.inherited(arguments);
 		if(!this.getGuid())
 			this.setGuid(App.createGuid());
-		console.log("Created item with ID "+this.getGuid());
 	}
 });
