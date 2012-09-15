@@ -1,0 +1,9 @@
+{
+	"id":"com.chrismondok.shoppinglistmanager",
+	"version":"1.0.0",
+	"vendor":"Chris Mondok",
+	"type":"web",
+	"main":"debug.html",
+	"title":"Shopping List Manager",
+	"uiRevision":2
+}
