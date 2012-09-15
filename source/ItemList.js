@@ -44,6 +44,14 @@ enyo.kind({
 		item.$.ItemName.setContent(this.items[index].getProduct());
 		return true;
 	},
+	saveList:function()
+	{
+		var serialized = new Array();
+		var items = this.getItems();
+		for (var item in items)
+			serialized.push(items[item].serialize());
+		ShoppingListManager.Storage.set("list:"+this.getName(),serialized);
+	},
 	rendered:function()
 	{
 		this.inherited(arguments);
@@ -98,6 +106,7 @@ enyo.kind({
 			var ih = ln.offsetHeight;
 			this.$.Scroller.scrollTo(0,(ih/this.items.length) * itemIndex)
 		}
+		this.saveList();
 	},
 	checkout:function()
 	{

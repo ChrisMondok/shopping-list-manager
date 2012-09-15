@@ -21,7 +21,7 @@ enyo.kind({
 				]},
 			]},
 		]},
-		{name:"ItemList", kind:"ShoppingListManager.ShoppingList", canAdd:true, canDelete:true, fit:true},
+		{name:"DesiredItemsList", kind:"ShoppingListManager.ShoppingList", canAdd:true, canDelete:true, fit:true},
 	],
 	createSampleData:function()
 	{
@@ -35,7 +35,7 @@ enyo.kind({
 			if(Math.random() > 0.5)
 				desiredItems.push(enyo.create({kind:"ShoppingListManager.DesiredProduct",product:createdItems[i]}));
 		}
-		this.$.ItemList.setItems(desiredItems);
+		this.$.DesiredItemsList.setItems(desiredItems);
 	},
 	rendered:function()
 	{
@@ -44,7 +44,6 @@ enyo.kind({
 		if(this.getItemCount() == 0)
 			if(confirm("Create sample items?"))
 				this.createSampleData();
-		THIS = this;
 	},
 	create:function()
 	{
@@ -53,8 +52,9 @@ enyo.kind({
 	saveAllItemsToStorage:function()
 	{
 		var serialized = new Array();
-		for (var item in this.allItems)
-			serialized.push(this.allItems[item].serialize());
+		var allItems = this.getAllItems();
+		for (var item in allItems)
+			serialized.push(allItems[item].serialize());
 		ShoppingListManager.Storage.set("allItems",serialized);
 	},
 	loadItemsFromStorage:function()
@@ -129,7 +129,7 @@ enyo.kind({
 		var item = this.getOrCreateItemByName(itemName);
 		this.$.NewItem.setValue("");
 		this.updateSuggestions();
-		this.$.ItemList.addItem(item);
+		this.$.DesiredItemsList.addItem(item);
 	},
 	getOrCreateItemByName:function(itemName)
 	{
@@ -147,7 +147,7 @@ enyo.kind({
 		this.addItem(item);
 		return item;
 	},
-	getItemById:function(itemId)
+	getItemByGuid:function(itemId)
 	{
 		return this.allItems[itemId];
 	},
