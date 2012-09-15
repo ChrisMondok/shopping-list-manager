@@ -71,13 +71,12 @@ enyo.kind({
 	},
 	handleCartChanged:function()
 	{
-		var completed = 0;
-		for(var i = 0; i < this.items.length; i++)
-		{
-			if(this.items[i].getInCart())
-				completed++;
-		}
-		this.$.Progress.animateProgressTo(Math.floor((completed/this.items.length)*100));
+		this.updateProgress();
+	},
+	updateProgress:function()
+	{
+		var completed = this.getItemsInCart().length;
+		this.$.Progress.animateProgressTo(Math.floor((completed/this.getItems().length)*100));
 	},
 	getItemsInCart:function()
 	{

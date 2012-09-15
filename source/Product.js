@@ -30,6 +30,6 @@ enyo.kind({
 	{
 		this.inherited(arguments);
 		if(!this.getGuid())
-			this.setGuid(App.createGuid());
+			this.setGuid(ShoppingListManager.createGuid());
 	}
 });

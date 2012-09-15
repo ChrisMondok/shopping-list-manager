@@ -4,6 +4,7 @@ enyo.kind({
 	statics:{
 		set:function(key, value)
 		{
+			console.log("Saving "+key);
 			if(typeof value === "string")
 				return localStorage.setItem(key,"STRING:"+value);
 			if(typeof value === "object")
@@ -12,6 +13,7 @@ enyo.kind({
 		},
 		get:function(key)
 		{
+			console.log("Loading "+key);
 			var value = localStorage.getItem(key);
 			if(value)
 			{
