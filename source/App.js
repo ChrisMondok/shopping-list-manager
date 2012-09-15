@@ -3,11 +3,33 @@ enyo.kind({
 	fit: true,
 	components:[
 		{name: "Main", kind:"ShoppingListManager.Main"},
+		{name: "LoadingPopup", kind:"onyx.Popup", style:"text-align:center", centered:true, floating:true, scrim:true, components:[
+			{kind:"onyx.Spinner"},
+			{content:"Loading items"},
+		]},
 	],
-	create:function()
+	events:
+	{
+		onLoadStart:"",
+	},
+	handlers:
+	{
+		onLoadStart:"handleLoadStart",
+		itemsLoaded:"handleLoadFinish"
+	},
+	rendered:function()
 	{
 		this.inherited(arguments);
-		ShoppingListManager.loadItemsFromStorage();
+		this.doLoadStart();
+		enyo.asyncMethod(ShoppingListManager,ShoppingListManager.loadItemsFromStorage,this.waterfall.bind(this,"itemsLoaded"));
+	},
+	handleLoadStart:function()
+	{
+		this.$.LoadingPopup.show();
+	},
+	handleLoadFinish:function()
+	{
+		this.$.LoadingPopup.hide();
 	},
 	statics:
 	{
@@ -54,7 +76,7 @@ enyo.kind({
 				serialized.push(allItems[item].serialize());
 			this.Storage.set("allItems",serialized);
 		},
-		loadItemsFromStorage:function()
+		loadItemsFromStorage:function(callback)
 		{
 			var loadedItems = this.Storage.get("allItems");
 			if(loadedItems)
@@ -67,6 +89,7 @@ enyo.kind({
 				}
 				this._allItems = deserializedItems;
 			}
+			callback();
 		},
 		getItemByGuid:function(itemId)
 		{

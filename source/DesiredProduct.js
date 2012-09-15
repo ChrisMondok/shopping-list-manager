@@ -13,12 +13,22 @@ enyo.kind({
 			inCart:this.getInCart()
 		};
 	},
+	inCartChanged:function()
+	{
+		this.bubble("onCartChanged");
+		this.getOwner().doCartChanged();
+	},
+	create:function()
+	{
+		this.inherited(arguments);
+		DI = this;
+	},
 	statics:
 	{
-		deserialize:function(serialized,main)
+		deserialize:function(serialized)
 		{
 			serialized.kind = "ShoppingListManager.DesiredProduct";
-			serialized.product = main.getItemByGuid(serialized.productGuid);
+			serialized.product = ShoppingListManager.getItemByGuid(serialized.productGuid);
 			delete serialized.productGuid;
 			return enyo.create(serialized);
 		},

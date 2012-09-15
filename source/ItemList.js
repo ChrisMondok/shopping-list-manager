@@ -10,6 +10,7 @@ enyo.kind({
 	},
 	handlers:{
 		onCartChanged:"handleCartChanged",
+		itemsLoaded:"loadList",
 	},
 	components:[
 		{name:"Scroller", kind:enyo.Scroller, fit:true, touch:true, components:[
@@ -42,6 +43,7 @@ enyo.kind({
 		var index = inEvent.index;
 		var item = inEvent.item;
 		item.$.ItemName.setContent(this.items[index].getProduct());
+		item.$.Checkbox.setChecked(this.items[index].getInCart());
 		return true;
 	},
 	saveList:function()
@@ -52,9 +54,21 @@ enyo.kind({
 			serialized.push(items[item].serialize());
 		ShoppingListManager.Storage.set("list:"+this.getName(),serialized);
 	},
-	rendered:function()
+	loadList:function()
 	{
-		this.inherited(arguments);
+		var loadedItems = ShoppingListManager.Storage.get("list:"+this.getName());
+		if(loadedItems)
+		{
+			var deserializedItems = new Array();
+			for (var item in loadedItems)
+			{
+				var di = ShoppingListManager.DesiredProduct.deserialize(loadedItems[item])
+				di.setOwner(this);
+				deserializedItems.push(di);
+			}
+			this.setItems(deserializedItems);
+		}
+		this.updateProgress();
 	},
 	itemsChanged:function()
 	{
@@ -63,7 +77,6 @@ enyo.kind({
 	checkChanged:function(checkbox,event)
 	{
 		this.items[event.index].setInCart(checkbox.getChecked());
-		this.doCartChanged();
 	},
 	drawer:function()
 	{
@@ -72,6 +85,7 @@ enyo.kind({
 	handleCartChanged:function()
 	{
 		this.updateProgress();
+		this.saveList();
 	},
 	updateProgress:function()
 	{
