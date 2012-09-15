@@ -11,9 +11,9 @@ enyo.kind({
 	components:[
 		{kind:"FittableColumns", classes:"onyx-toolbar-inline", components:[
 			{kind:onyx.InputDecorator, fit:true, components:[
-				{kind:onyx.Input, name:"NewItem", placeholder:"New item", onkeyup:"filterInputChanged", fit:true},
+				{kind:onyx.Input, name:"NewItem", placeholder:"New item", oninput:"filterInputChanged", fit:true},
 			]},
-			{kind:onyx.Button, classes:"onyx-affirmative", content:"Add", onclick:"addItem"} 
+			{kind:onyx.Button, classes:"onyx-affirmative", content:"Add", onclick:"userAddItem"} 
 		]},
 		{name:"Drawer", kind:"ResizableDrawer", classes:"suggestionsDrawer", open:true, components:[
 			{name:"SuggestionsList", kind:enyo.Repeater, fit:true, onSetupItem: "renderSuggestions", components:[
@@ -28,20 +28,21 @@ enyo.kind({
 	{
 		var itemNames = ["Cereal", "Bananas", "Milk", "Eggs", "Butter", "Bread", "Hamburgers", "Orange Juice", "Cheddar Cheese", "Ham"];
 		var desiredItems = [];
+		var createdItems = []
 		for(var i = 0; i < itemNames.length; i++)
 		{
-			this.allItems.push(enyo.create({kind:"ShoppingListManager.Product",productName:itemNames[i]}));
+			createdItems.push(enyo.create({kind:"ShoppingListManager.Product",productName:itemNames[i]}));
+			this.addItem(createdItems[i]);
 			if(Math.random() > 0.5)
-				desiredItems.push(enyo.create({kind:"ShoppingListManager.DesiredProduct",product:this.allItems[i]}));
+				desiredItems.push(enyo.create({kind:"ShoppingListManager.DesiredProduct",product:createdItems[i]}));
 		}
-		this.allItemsChanged();
 		this.$.ItemList.setItems(desiredItems);
 	},
 	rendered:function()
 	{
 		this.inherited(arguments);
 		this.loadItemsFromStorage();
-		if(this.getAllItems().length == 0)
+		if(this.getItemCount() == 0)
 			if(confirm("Create sample items?"))
 				this.createSampleData();
 		THIS = this;
@@ -64,7 +65,10 @@ enyo.kind({
 		{
 			var deserializedItems = new Array();
 			for (var item in loadedItems)
-				deserializedItems.push(ShoppingListManager.Product.deserialize(loadedItems[item]));
+			{
+				var di = ShoppingListManager.Product.deserialize(loadedItems[item])
+				deserializedItems[di.getGuid()] = di;
+			}
 			this.setAllItems(deserializedItems);
 		}
 	},
@@ -75,10 +79,11 @@ enyo.kind({
 	},
 	resetSuggestions:function()
 	{
+		console.log("Suggestions reset");
 		var suggestions = new Array();
 		var items = this.getAllItems();
-		for(var i = 0; i < items.length; i++)
-			suggestions.push(items[i]);
+		for(var itemId in items)
+			suggestions.push(items[itemId]);
 		this.setSuggestions(suggestions);
 	},
 	filterInputChanged:function(input, event)
@@ -91,26 +96,31 @@ enyo.kind({
 	},
 	setFilterString:function(string)
 	{
+		var needReset = false;
 		var filter = function(item,index,array)
 		{
 			var name = item.getProductName().toLowerCase();
 			return (name.indexOf(string.toLowerCase()) != -1 && name != string.toLowerCase());
 		}
 
-		if(string.indexOf(this.filterString) != 0)
-			this.resetSuggestions();
+		if(string.indexOf(this.getFilterString()) != 0)
+			needReset = true;
 
+		console.log("Setting filter string to \""+string+"\"");
 		this.filterString = string;
-		if(string.length)
+		if(string.length && !needReset)
 		{
 			var suggestions = this.getSuggestions();
 			suggestions = suggestions.filter(filter,this);
 			this.setSuggestions(suggestions);
 		}
+		else
+			this.resetSuggestions();
 	},
 	suggestionsChanged:function()
 	{
-		if(this.getSuggestions().length < this.getAllItems().length)
+		console.log("Suggestions changed, string length is "+this.getFilterString().length);
+		if(this.getSuggestions().length && this.getFilterString().length)
 		{
 			this.$.SuggestionsList.setCount(Math.min(5,this.getSuggestions().length));
 			this.$.Drawer.setOpen(true);
@@ -119,7 +129,6 @@ enyo.kind({
 		else
 		{
 			this.$.Drawer.setOpen(false);
-			this.$.SuggestionsList.setCount(0);
 		}
 	},
 	renderSuggestions:function(inSender, inEvent)
@@ -130,30 +139,57 @@ enyo.kind({
 		row.$.Suggestion.setContent(item.getProductName());
 		return true;
 	},
-	addItem:function(inSender, inEvent)
+	addItem:function(item)
 	{
-		var createProduct = function(item)
-		{
-			item = enyo.create({kind:"ShoppingListManager.Product",productName:this.$.NewItem.getValue()});
-			this.allItems.unshift(item);
-			this.allItemsChanged();
-		}
-		var found = false;
-		var item = this.getItemByName(this.$.NewItem.getValue());
-		if(!item)
-			createProduct(item);
+		this.allItems[item.getGuid()] = item;
+		this.allItemsChanged();
+	},
+	userAddItem:function(inSender, inEvent)
+	{
+		var itemName = this.$.NewItem.getValue()
+		var item = this.getOrCreateItemByName(itemName);
 		this.$.NewItem.setValue("");
 		this.setFilterString("");
 		this.$.ItemList.addItem(item);
-
+	},
+	getOrCreateItemByName:function(itemName)
+	{
+		var item = this.getItemByName(itemName);
+		if(item)
+			return item;
+		else
+		{
+			return this.createItemWithName(itemName);
+		}
+	},
+	createItemWithName:function(itemName)
+	{
+		item = enyo.create({kind:"ShoppingListManager.Product",productName:itemName});
+		this.addItem(item);
+		return item;
+	},
+	getItemById:function(itemId)
+	{
+		return this.allItems[itemId];
 	},
 	getItemByName:function(name)
 	{
 		var items = this.getAllItems();
-		for(var i = 0; i < items.length; i++)
-			if(items[i].getProductName().toLowerCase() == name.toLowerCase())
-				return items[i];
+		for(var itemId in items)
+			if(items[itemId].getProductName().toLowerCase() == name.toLowerCase())
+				return items[itemId];
 		return null;
+	},
+	getItemCount:function()
+	{
+		var count = 0;
+		var ai = this.getAllItems();
+		for(var i in ai)
+		{
+			if(ai.hasOwnProperty(i))
+				count++;
+		}
+		return count;
 	},
 	useSuggestion:function(inSender,inEvent)
 	{

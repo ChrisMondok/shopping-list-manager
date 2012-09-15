@@ -111,9 +111,9 @@ enyo.kind({
 	getItemByName:function(name)
 	{
 		var items = this.getItems();
-		for(var i = 0; i < items.length; i++)
-			if(items[i].getProduct().getProductName().toLowerCase() == name.toLowerCase())
-				return items[i];
+		for(itemId in items)
+			if(items[itemId].getProduct().getProductName().toLowerCase() == name.toLowerCase())
+				return items[itemId];
 		return null;
 	},
 	getItemIndex:function(item)

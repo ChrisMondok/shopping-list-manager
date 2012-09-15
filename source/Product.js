@@ -4,6 +4,7 @@ enyo.kind({
 	{
 		productName:"Unnamed product",
 		lastPurchased:null,
+		guid:null,
 	},
 	toString:function()
 	{
@@ -12,15 +13,24 @@ enyo.kind({
 	serialize:function()
 	{
 		return {
-			productName:this.productName,
-			lastPurchased:this.lastPurchased
+			guid:this.getGuid(),
+			productName:this.getProductName(),
+			lastPurchased:this.getLastPurchased()
 		};
 	},
 	statics:
 	{
 		deserialize:function(serialized)
 		{
-			return enyo.create({kind:"ShoppingListManager.Product",productName:serialized.productName,lastPurchased:serialized.productName});
-		}
+			serialized.kind = "ShoppingListManager.Product";
+			return enyo.create(serialized);
+		},
 	},
+	create:function()
+	{
+		this.inherited(arguments);
+		if(!this.getGuid())
+			this.setGuid(App.createGuid());
+		console.log("Created item with ID "+this.getGuid());
+	}
 });
