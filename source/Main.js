@@ -7,7 +7,7 @@ enyo.kind({
 		keyTimer:null,
 	},
 	components:[
-		{kind:"FittableColumns", classes:"onyx-toolbar-inline", components:[
+		{kind:"FittableColumns", classes:"onyx-toolbar onyx-toolbar-inline", components:[
 			{kind:onyx.InputDecorator, fit:true, components:[
 				{kind:onyx.Input, name:"NewItem", placeholder:"New item", oninput:"filterInputChanged", fit:true},
 			]},
