@@ -6,6 +6,10 @@ enyo.kind({
 		suggestions: [],
 		keyTimer:null,
 	},
+	handlers:{
+		onCheckedOut:"showStorePopup",
+		onLocationCancel:"hideStorePopup",
+	},
 	components:[
 		{kind:"FittableColumns", classes:"onyx-toolbar onyx-toolbar-inline", components:[
 			{kind:onyx.InputDecorator, fit:true, components:[
@@ -21,6 +25,18 @@ enyo.kind({
 			]},
 		]},
 		{name:"DesiredItemsList", kind:"ShoppingListManager.ShoppingList", canAdd:true, canDelete:true, fit:true},
+		{
+			name:"StorePopup",
+			kind:"onyx.Popup",
+			centered:true,
+			autoDismiss:false,
+			modal:true,
+			style:"width:90%; height:90%;",
+			classes:"shadowed-popup",
+			components:[
+				{kind:"ShoppingListManager.LocationList"},
+			]
+		},
 	],
 	createSampleData:function()
 	{
@@ -106,5 +122,14 @@ enyo.kind({
 		var index = inEvent.index;
 		this.$.NewItem.setValue(this.getSuggestions()[index].getProductName());
 		this.updateSuggestions();
-	}
+	},
+	showStorePopup:function(inSender,inEvent)
+	{
+		this.$.StorePopup.show();
+	},
+	hideStorePopup:function(inSender,inEvent)
+	{
+		this.$.StorePopup.hide();
+	},
+
 })

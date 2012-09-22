@@ -7,6 +7,7 @@ enyo.kind({
 	},
 	events:{
 		onCartChanged:"",
+		onCheckedOut:"",
 	},
 	handlers:{
 		onCartChanged:"handleCartChanged",
@@ -17,7 +18,7 @@ enyo.kind({
 			{name:"List", kind:enyo.Repeater, fit:true, onSetupItem: "setupItem", components:[
 				{kind:"onyx.Item", tapHighlight:true, components:[
 					{kind:"FittableColumns", fit:true, classes:"onyx-toolbar-inline", components:[
-						{name:"optionsDrawer", kind:"onyx.Drawer", orient:"h", open:false, style:"max-height:32px", components:[
+						{name:"optionsDrawer", kind:"onyx.Drawer", orient:"h", open:false, style:"max-height:32px; overflow:visible", components:[
 							{name:"removeItemButton", kind:"onyx.Button", content:"Remove", classes:"onyx-negative", ontap:"removeTapped"},
 						]},
 						{name:"ItemName", content:"No product", fit:true, classes:"itemName", ontap:"nameTapped"},
@@ -31,7 +32,7 @@ enyo.kind({
 		]},
 		{kind:"FittableColumns", classes:"onyx-toolbar onyx-toolbar-inline", components:[
 			{fit:true, components:[
-				{name:"Progress", kind:onyx.ProgressBar, animateStripes:true, barClasses:"onyx-dark"},
+				{name:"Progress", kind:onyx.ProgressBar, animateStripes:false, showStripes:false },
 			]},
 			{kind:onyx.TooltipDecorator, components:[
 				{kind:onyx.Button, content:"Check out", ontap:"checkout", classes:"onyx-blue"},
@@ -90,18 +91,7 @@ enyo.kind({
 		if(row.$.optionsDrawer.getOpen())
 			row.$.optionsDrawer.setOpen(false);
 		else
-		{
 			row.$.optionsDrawer.setOpen(true);
-			var closeDrawer = function()
-			{
-				try
-				{
-					this.setOpen(false)
-				}
-				catch(exception){} //if this item is deleted, there's no drawer left to close.
-			}.bind(row.$.optionsDrawer);
-			setTimeout(closeDrawer,3500);
-		}
 	},
 	removeTapped:function(sender,event)
 	{
@@ -164,6 +154,8 @@ enyo.kind({
 	},
 	checkout:function()
 	{
+		this.bubble("onCheckedOut");
+		return;
 		var cart = this.getItemsInCart();
 		for(var item in cart)
 		{

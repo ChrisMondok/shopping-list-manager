@@ -13,6 +13,7 @@ enyo.kind({
 	serialize:function()
 	{
 		return {
+			kind:this.kind,
 			guid:this.getGuid(),
 			productName:this.getProductName(),
 			lastPurchased:this.getLastPurchased()
@@ -22,7 +23,7 @@ enyo.kind({
 	{
 		deserialize:function(serialized)
 		{
-			serialized.kind = "ShoppingListManager.Product";
+			serialized.kind = serialized.kind || "ShoppingListManager.Product";
 			return enyo.create(serialized);
 		},
 	},
