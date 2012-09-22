@@ -11,5 +11,7 @@ enyo.depends(
 	//"ProductDisplay.js",
 	"Storage.js",
 	"ResizableDrawer.js",
-	"LocationList.js"
+	"Location.js",
+	"CheckoutHelper.js",
+	"UnavailableItemList.js"
 );

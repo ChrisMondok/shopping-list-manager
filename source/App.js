@@ -8,6 +8,7 @@ enyo.kind({
 			{content:"Loading items"},
 		]},
 	],
+	classes:"onyx",
 	events:
 	{
 		onLoadStart:"",
@@ -15,13 +16,13 @@ enyo.kind({
 	handlers:
 	{
 		onLoadStart:"handleLoadStart",
-		itemsLoaded:"handleLoadFinish"
+		onItemsLoaded:"handleLoadFinish"
 	},
-	rendered:function()
+	create:function()
 	{
 		this.inherited(arguments);
 		this.doLoadStart();
-		enyo.asyncMethod(ShoppingListManager,ShoppingListManager.loadItemsFromStorage,this.waterfall.bind(this,"itemsLoaded"));
+		enyo.asyncMethod(ShoppingListManager,ShoppingListManager.loadItemsFromStorage,this.waterfall.bind(this,"onItemsLoaded"));
 	},
 	handleLoadStart:function()
 	{

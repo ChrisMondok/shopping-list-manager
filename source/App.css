@@ -6,9 +6,18 @@
 	background-color: #EAEAEA;
 }
 
+@-o-keyframes highlight {
+  from {
+	background-color: #C4E3FE;
+  }
+  to {
+	background-color: #EAEAEA;
+  }
+}
+
 .itemName
 {
-	font-size:1.25em;
+	font-size:1.25rem;
 	display:inline-block;
 	vertical-align:middle;
 	margin:4px 6px 5px;
@@ -49,10 +58,18 @@ input
 	width:100%;
 }
 
+.enyo-panels
+{
+	margin:10px;
+}
 .enyo-panels > *
 {
-	background-color:#EAEAEA;
 	box-shadow:-4px 0px 4px rgba(0,0,0,0.3);
-	-webkitbox-shadow:-4px 0px 4px rgba(0,0,0,0.3);
+	-webkit-box-shadow:-4px 0px 4px rgba(0,0,0,0.3);
 	-moz-box-shadow:-4px 0px 4px rgba(0,0,0,0.3);
+}
+
+.highlight
+{
+	-o-animation: highlight 1s ease-in-out 1;
 }

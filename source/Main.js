@@ -1,43 +1,81 @@
 enyo.kind({
 	name:"ShoppingListManager.Main",
-	kind: "FittableRows",
+	kind: "Control",
 	classes: "enyo-fit",
 	published:{
 		suggestions: [],
 		keyTimer:null,
 	},
 	handlers:{
-		onCheckedOut:"showStorePopup",
+		onCheckout:"showStorePopup",
 		onLocationCancel:"hideStorePopup",
+		onCartChanged:"cartChanged",
+		onItemsChanged:"itemsChanged",
+		onItemsLoaded:"updateProgress",
 	},
 	components:[
-		{kind:"FittableColumns", classes:"onyx-toolbar onyx-toolbar-inline", components:[
-			{kind:onyx.InputDecorator, fit:true, components:[
-				{kind:onyx.Input, name:"NewItem", placeholder:"New item", oninput:"filterInputChanged", fit:true},
+		{kind:"FittableRows", fit:true, classes:"enyo-fit",  components:[
+			{kind:"FittableColumns", classes:"onyx-toolbar onyx-toolbar-inline", components:[
+				{kind:onyx.InputDecorator, fit:true, components:[
+					{kind:onyx.Input, name:"NewItem", placeholder:"New item", oninput:"filterInputChanged", fit:true},
+				]},
+				{kind:onyx.Button, classes:"onyx-affirmative", content:"Add", onclick:"addItem"} 
 			]},
-			{kind:onyx.Button, classes:"onyx-affirmative", content:"Add", onclick:"addItem"} 
-		]},
-		{name:"Drawer", kind:"ResizableDrawer", classes:"suggestionsDrawer", open:false, components:[
-			{name:"SuggestionsList", kind:enyo.Repeater, fit:true, onSetupItem: "renderSuggestions", components:[
-				{kind:onyx.Item, onclick:"useSuggestion", components:[
-					{name:"Suggestion"},
+			{name:"Drawer", kind:"ResizableDrawer", classes:"suggestionsDrawer", open:false, components:[
+				{name:"SuggestionsList", kind:enyo.Repeater, fit:true, onSetupItem: "renderSuggestions", components:[
+					{kind:onyx.Item, onclick:"useSuggestion", components:[
+						{name:"Suggestion"},
+					]},
+				]},
+			]},
+			{name:"DesiredItemsList", kind:"ShoppingListManager.ShoppingList", canAdd:true, canDelete:true, fit:true},
+			{kind:"FittableColumns", classes:"onyx-toolbar onyx-toolbar-inline", components:[
+				{fit:true, components:[
+					{name:"Progress", kind:onyx.ProgressBar, animateStripes:false, showStripes:false },
+				]},
+				{kind:onyx.TooltipDecorator, components:[
+					{kind:onyx.Button, content:"Check out", ontap:"doCheckout", classes:"onyx-blue"},
+					{kind:onyx.Tooltip, content:"Remove items in cart from list"},
 				]},
 			]},
 		]},
-		{name:"DesiredItemsList", kind:"ShoppingListManager.ShoppingList", canAdd:true, canDelete:true, fit:true},
 		{
 			name:"StorePopup",
 			kind:"onyx.Popup",
 			centered:true,
 			autoDismiss:false,
 			modal:true,
+			scrim:true,
+			floating:true,
 			style:"width:90%; height:90%;",
 			classes:"shadowed-popup",
 			components:[
-				{kind:"ShoppingListManager.LocationList"},
+				{name:"CheckoutHelper", kind:"ShoppingListManager.CheckoutHelper"},
 			]
 		},
 	],
+	rendered:function()
+	{
+		this.inherited(arguments);
+		this.$.NewItem.focus();
+	},
+	doCheckout:function()
+	{
+		this.waterfall("onCheckout");
+	},
+	updateProgress:function()
+	{
+		var completed = this.$.DesiredItemsList.getItemsInCart().length;
+		this.$.Progress.animateProgressTo(Math.floor((completed/this.$.DesiredItemsList.getItems().length)*100));
+	},
+	cartChanged:function()
+	{
+		this.updateProgress();
+	},
+	itemsChanged:function()
+	{
+		this.updateProgress();
+	},
 	createSampleData:function()
 	{
 		var itemNames = ["Cereal", "Bananas", "Milk", "Eggs", "Butter", "Bread", "Hamburgers", "Orange Juice", "Cheddar Cheese", "Ham"];
@@ -125,7 +163,17 @@ enyo.kind({
 	},
 	showStorePopup:function(inSender,inEvent)
 	{
+		var itemsNotInCart = this.$.DesiredItemsList.getItemsNotInCart();
+		var unavailableItems = new Array();
+		for(var key in itemsNotInCart)
+		{
+			unavailableItems.push({
+				product: itemsNotInCart[key],
+				available:false
+			});
+		}
 		this.$.StorePopup.show();
+		this.$.CheckoutHelper.setUnavailableItems(unavailableItems);
 	},
 	hideStorePopup:function(inSender,inEvent)
 	{

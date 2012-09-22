@@ -1,49 +1,40 @@
 enyo.kind({
 	name:"ShoppingListManager.ShoppingList",
-	kind:"FittableRows",
+	kind:"Scroller",
+	touch:true,
 	published:{
 		items:new Array(),
-		listKind:"ShoppingListManager.ProductDisplay",
 	},
 	events:{
 		onCartChanged:"",
-		onCheckedOut:"",
+		onCheckout:"",
 	},
 	handlers:{
 		onCartChanged:"handleCartChanged",
-		itemsLoaded:"loadList",
+		onItemsLoaded:"loadList",
+		onItemsChanged:"itemsChanged",
+		onCheckout:"checkout",
 	},
 	components:[
-		{name:"Scroller", kind:enyo.Scroller, fit:true, touch:true, components:[
-			{name:"List", kind:enyo.Repeater, fit:true, onSetupItem: "setupItem", components:[
-				{kind:"onyx.Item", tapHighlight:true, components:[
-					{kind:"FittableColumns", fit:true, classes:"onyx-toolbar-inline", components:[
-						{name:"optionsDrawer", kind:"onyx.Drawer", orient:"h", open:false, style:"max-height:32px; overflow:visible", components:[
-							{name:"removeItemButton", kind:"onyx.Button", content:"Remove", classes:"onyx-negative", ontap:"removeTapped"},
-						]},
-						{name:"ItemName", content:"No product", fit:true, classes:"itemName", ontap:"nameTapped"},
-						{name:"Details", content:"", classes:"itemDetails"},
-						{name:"CheckboxContainer", showing:true, components:[
-							{name:"Checkbox", kind:onyx.Checkbox, onActivate:"checkChanged"},
-						]},
+		{name:"List", kind:enyo.Repeater, fit:true, onSetupItem: "setupItem", components:[
+			{kind:"onyx.Item", tapHighlight:true, components:[
+				{kind:"FittableColumns", fit:true, classes:"onyx-toolbar-inline", components:[
+					{name:"optionsDrawer", kind:"onyx.Drawer", orient:"h", open:false, style:"max-height:32px; overflow:visible", components:[
+						{name:"removeItemButton", kind:"onyx.Button", content:"Remove", classes:"onyx-negative", ontap:"removeTapped"},
+					]},
+					{name:"ItemName", content:"No product", fit:true, classes:"itemName", ontap:"nameTapped"},
+					{name:"Details", content:"", classes:"itemDetails"},
+					{name:"CheckboxContainer", showing:true, components:[
+						{name:"Checkbox", kind:onyx.Checkbox, onActivate:"checkChanged"},
 					]},
 				]},
 			]},
 		]},
-		{kind:"FittableColumns", classes:"onyx-toolbar onyx-toolbar-inline", components:[
-			{fit:true, components:[
-				{name:"Progress", kind:onyx.ProgressBar, animateStripes:false, showStripes:false },
-			]},
-			{kind:onyx.TooltipDecorator, components:[
-				{kind:onyx.Button, content:"Check out", ontap:"checkout", classes:"onyx-blue"},
-				{kind:onyx.Tooltip, content:"Remove items in cart from list"},
-			]},
-		]},
-		{name:"itemMenu", kind:"onyx.Menu",  components:[
-			{content:"Remove from list"},
-			{content:"Edit note"},
-		]},
 	],
+	create:function()
+	{
+		this.inherited(arguments);
+	},
 	setupItem:function(inSender, inEvent)
 	{
 		var index = inEvent.index;
@@ -68,18 +59,19 @@ enyo.kind({
 			var deserializedItems = new Array();
 			for (var item in loadedItems)
 			{
-				var di = ShoppingListManager.DesiredProduct.deserialize(loadedItems[item])
-				di.setOwner(this);
-				deserializedItems.push(di);
+				var serialized = loadedItems[item];
+				serialized.kind = "ShoppingListManager.DesiredProduct";
+				serialized.product = ShoppingListManager.getItemByGuid(serialized.productGuid);
+				delete serialized.productGuid;
+				deserializedItems.push(this.createComponent(serialized));
 			}
 			this.setItems(deserializedItems);
 		}
-		this.updateProgress();
 	},
 	itemsChanged:function()
 	{
+		this.saveList();
 		this.$.List.setCount(this.items.length);
-		this.updateProgress();
 	},
 	checkChanged:function(checkbox,event)
 	{
@@ -99,13 +91,7 @@ enyo.kind({
 	},
 	handleCartChanged:function()
 	{
-		this.updateProgress();
 		this.saveList();
-	},
-	updateProgress:function()
-	{
-		var completed = this.getItemsInCart().length;
-		this.$.Progress.animateProgressTo(Math.floor((completed/this.getItems().length)*100));
 	},
 	getItemsInCart:function()
 	{
@@ -124,7 +110,7 @@ enyo.kind({
 		{
 			item = enyo.create({kind:"ShoppingListManager.DesiredProduct", product:newItem});
 			this.items.unshift(item);
-			this.itemsChanged();
+			this.bubble("onItemsChanged");
 		}
 		//Scroll to reveal item
 		var itemIndex = this.getItemIndex(item);
@@ -132,14 +118,10 @@ enyo.kind({
 		{
 			var ln = this.$.List.hasNode();
 			var ih = ln.offsetHeight;
-			this.$.Scroller.scrollTo(0,(ih/this.items.length) * itemIndex)
+			var row = this.$.List.getComponents()[itemIndex];
+			row.$.item.addClass("highlight");
+			this.scrollTo(0,(ih/this.items.length) * itemIndex)
 		}
-		this.saveList();
-	},
-	collapseRow:function(row,event)
-	{
-		row.addClass("collapsed");
-		debugger;
 	},
 	removeItem:function(item,suppressUpdate)
 	{
@@ -148,13 +130,12 @@ enyo.kind({
 		items.splice(index,1);
 		if(!suppressUpdate)
 		{
-			this.saveList();
-			this.itemsChanged();
+			this.bubble("onItemsChanged");
 		}
 	},
 	checkout:function()
 	{
-		this.bubble("onCheckedOut");
+		console.log("I'd remove some items here");
 		return;
 		var cart = this.getItemsInCart();
 		for(var item in cart)
@@ -162,8 +143,7 @@ enyo.kind({
 			cart[item].getProduct().setLastPurchased(new Date());
 			this.removeItem(cart[item],true);
 		}
-		this.saveList();
-		this.itemsChanged();
+		this.bubble("onItemsChanged");
 	},
 	getItemByProduct:function(product)
 	{
@@ -179,6 +159,15 @@ enyo.kind({
 			if(this.items[i] == item)
 				return i;
 		return -1;
+	},
+	getItemsNotInCart:function()
+	{
+		var notInCart = new Array();
+		allItems = this.getItems();
+		for(var key in allItems)
+			if(! (allItems[key]).getInCart())
+				notInCart.push(allItems[key].getProduct());
+		return notInCart;
 	}
 });
 

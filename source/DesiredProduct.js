@@ -13,24 +13,14 @@ enyo.kind({
 			inCart:this.getInCart()
 		};
 	},
-	inCartChanged:function()
-	{
-		this.bubble("onCartChanged");
-		this.getOwner().doCartChanged();
-	},
 	create:function()
 	{
 		this.inherited(arguments);
 		DI = this;
 	},
-	statics:
+	inCartChanged:function()
 	{
-		deserialize:function(serialized)
-		{
-			serialized.kind = "ShoppingListManager.DesiredProduct";
-			serialized.product = ShoppingListManager.getItemByGuid(serialized.productGuid);
-			delete serialized.productGuid;
-			return enyo.create(serialized);
-		},
-	},
+		this.inherited(arguments);
+		this.owner.bubble("onCartChanged"); //yeah, this is awful, I know, but bubble doesn't work from here, since it's not a component.
+	}
 });
