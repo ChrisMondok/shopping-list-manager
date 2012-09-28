@@ -6,8 +6,8 @@ enyo.kind({
 		pendingName:"",
 		pendingLocation:"",
 		currentLocation:null,
-		inCart:new Array(),
 		selectedRow:null,
+		list:null,
 	},
 	events:{
 		onCommitCheckout:"",
@@ -39,7 +39,7 @@ enyo.kind({
 				{kind:"onyx.Toolbar", components:[
 					{kind:"onyx.Grabber", ontap:"panelToggle"},
 					{kind:"onyx.Button", content:"Select all", ontap:"selectAll"},
-					{name:"DoneButton", kind:"onyx.Button", content:"Done", disabled:true, classes:"onyx-affirmative" },
+					{name:"DoneButton", kind:"onyx.Button", content:"Check out here", disabled:true, classes:"onyx-affirmative", ontap:"processCheckout" },
 				]},
 			]},
 		]},
@@ -76,9 +76,18 @@ enyo.kind({
 			]
 		},
 	],
-	setUnavailableItems:function(items)
+	listChanged:function()
 	{
-		this.$.unavailableItemsList.setItems(items);
+		var itemsNotInCart = this.getList().getItemsNotInCart();
+		var unavailableItems = new Array();
+		for(var key in itemsNotInCart)
+		{
+			unavailableItems.push({
+				product: itemsNotInCart[key],
+				unavailable:false
+			});
+		}
+		this.$.unavailableItemsList.setItems(unavailableItems);
 	},
 	gotLocation:function(loc)
 	{
@@ -182,5 +191,13 @@ enyo.kind({
 	selectAll:function()
 	{
 		this.waterfall("onSelectAll");
+	},
+	processCheckout:function()
+	{
+		if(this.$.DoneButton.getDisabled())
+			return;
+		//mark unavailable items
+		//mark available items
+		this.doCancelCheckout();
 	},
 });

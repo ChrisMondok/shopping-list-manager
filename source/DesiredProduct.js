@@ -13,6 +13,9 @@ enyo.kind({
 			inCart:this.getInCart()
 		};
 	},
+	events:{
+		onCartChanged:"",
+	},
 	create:function()
 	{
 		this.inherited(arguments);
@@ -20,7 +23,6 @@ enyo.kind({
 	},
 	inCartChanged:function()
 	{
-		this.inherited(arguments);
-		this.owner.bubble("onCartChanged"); //yeah, this is awful, I know, but bubble doesn't work from here, since it's not a component.
+		this.doCartChanged();
 	}
 });

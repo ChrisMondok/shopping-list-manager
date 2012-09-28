@@ -4,7 +4,6 @@ enyo.kind({
 	classes: "enyo-fit",
 	published:{
 		suggestions: [],
-		keyTimer:null,
 	},
 	events:{
 		onShowStorePopup:"",
@@ -15,7 +14,8 @@ enyo.kind({
 		onLocationCancel:"hideStorePopup",
 		onCartChanged:"cartChanged",
 		onItemsChanged:"itemsChanged",
-		onItemsLoaded:"updateProgress",
+		//onItemsLoaded:"updateProgress",
+		onListLoaded:"updateProgress",
 		onCommitCheckout:"commitCheckout",
 		onCancelCheckout:"cancelCheckout"
 	},
@@ -34,11 +34,9 @@ enyo.kind({
 					]},
 				]},
 			]},
-			{name:"DesiredItemsList", kind:"ShoppingListManager.ShoppingList", canAdd:true, canDelete:true, fit:true},
-			{kind:"FittableColumns", classes:"onyx-toolbar onyx-toolbar-inline", components:[
-				{name:"Progress", fit:true, kind:onyx.ProgressButton, ontap:"doShowStorePopup", animateStripes:false, showStripes:false, components:[
-					{content:"Check out", style:"float:right"},
-				]},
+			{name:"DesiredItemsList", kind:"ShoppingListManager.ShoppingList", canAdd:true, canDelete:true, classes:"recessed", fit:true},
+			{name:"Progress", kind:"ShoppingListManager.CheckoutButton", ontap:"doShowStorePopup", animateStripes:false, showStripes:false, components:[
+				{content:"Check out", style:"float:right"},
 			]},
 		]},
 		{
@@ -50,6 +48,8 @@ enyo.kind({
 			floating:true,
 			style:"width:90%; height:90%;",
 			classes:"shadowed-popup",
+			onShow:"addCheckoutHelper",
+			onHide:"removeCheckoutHelper",
 			components:[
 				{name:"CheckoutHelper", kind:"ShoppingListManager.CheckoutHelper"},
 			]
@@ -72,7 +72,8 @@ enyo.kind({
 	updateProgress:function()
 	{
 		var completed = this.$.DesiredItemsList.getItemsInCart().length;
-		this.$.Progress.animateProgressTo(Math.floor((completed/this.$.DesiredItemsList.getItems().length)*100));
+		if(this.$.DesiredItemsList.getItems().length)
+			this.$.Progress.animateProgressTo(Math.floor((completed/this.$.DesiredItemsList.getItems().length)*100));
 	},
 	cartChanged:function()
 	{
@@ -88,11 +89,7 @@ enyo.kind({
 	},
 	filterInputChanged:function(input, event)
 	{
-		if(this.getKeyTimer())
-			clearTimeout(this.getKeyTimer());
-		//I'd use a future here, but enyo 2 doesn't have those?
-		var t = setTimeout(this.updateSuggestions.bind(this),500);
-		this.setKeyTimer(t);
+		enyo.job("updateSuggestions",enyo.bind(this,"updateSuggestions"),750);
 	},
 	updateSuggestions:function()
 	{
@@ -155,18 +152,8 @@ enyo.kind({
 	},
 	showStorePopup:function(inSender,inEvent)
 	{
-		var itemsNotInCart = this.$.DesiredItemsList.getItemsNotInCart();
-		var unavailableItems = new Array();
-		for(var key in itemsNotInCart)
-		{
-			unavailableItems.push({
-				product: itemsNotInCart[key],
-				unavailable:false
-			});
-		}
 		this.$.StorePopup.show();
-		this.$.CheckoutHelper.setUnavailableItems(unavailableItems);
-		this.$.CheckoutHelper.setInCart(this.$.DesiredItemsList.getProductsInCart());
+		this.$.CheckoutHelper.setList(this.$.DesiredItemsList);
 	},
 	hideStorePopup:function(inSender,inEvent)
 	{

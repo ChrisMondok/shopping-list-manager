@@ -8,6 +8,7 @@ enyo.kind({
 	events:{
 		onCartChanged:"",
 		onCheckout:"",
+		onListLoaded:"",
 	},
 	handlers:{
 		onCartChanged:"handleCartChanged",
@@ -67,6 +68,7 @@ enyo.kind({
 			}
 			this.setItems(deserializedItems);
 		}
+		this.doListLoaded();
 	},
 	itemsChanged:function()
 	{

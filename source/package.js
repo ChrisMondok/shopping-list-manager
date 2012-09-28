@@ -8,10 +8,10 @@ enyo.depends(
 	"ItemList.js",
 	"Product.js",
 	"DesiredProduct.js",
-	//"ProductDisplay.js",
 	"Storage.js",
 	"ResizableDrawer.js",
 	"Location.js",
 	"CheckoutHelper.js",
-	"UnavailableItemList.js"
+	"UnavailableItemList.js",
+	"CheckoutButton.js"
 );

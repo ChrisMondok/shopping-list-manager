@@ -6,7 +6,31 @@
 	background-color: #EAEAEA;
 }
 
+@keyframes highlight {
+  from {
+	background-color: #C4E3FE;
+  }
+  to {
+	background-color: #EAEAEA;
+  }
+}
 @-o-keyframes highlight {
+  from {
+	background-color: #C4E3FE;
+  }
+  to {
+	background-color: #EAEAEA;
+  }
+}
+@-webkit-keyframes highlight {
+  from {
+	background-color: #C4E3FE;
+  }
+  to {
+	background-color: #EAEAEA;
+  }
+}
+@-moz-keyframes highlight {
   from {
 	background-color: #C4E3FE;
   }
@@ -42,7 +66,7 @@ input
 	background:white;
 }
 
-.slm-progress-button-client
+.checkout-button .onyx-progress-button-client
 {
 	display: inline-block;
 	position: absolute;
@@ -71,11 +95,22 @@ input
 
 .highlight
 {
+	animation: highlight 1s ease-in-out 1;
 	-o-animation: highlight 1s ease-in-out 1;
+	-webkit-animation: highlight 1s ease-in-out 1;
+	-moz-animation: highlight 1s ease-in-out 1;
 }
 
 .selected
 {
 	background-color: #C4E3FE;
 	color: black;
+}
+
+.recessed
+{
+	border-color:black;
+	border-style:solid;
+	border-width:0px 4px 0px 4px;
+	background-color:rgba(0,0,0,0.1);
 }
