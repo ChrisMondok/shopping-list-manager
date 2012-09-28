@@ -5,6 +5,16 @@ enyo.kind({
 		latitude:null,
 		longitude:null, 
 		locationName:null,
+		available:null,
+		unavailable:null,
+	},
+	create:function()
+	{
+		this.inherited(arguments);
+		if(!this.getAvailable())
+			this.setAvailable(new Array());
+		if(!this.getUnavailable())
+			this.setUnavailable(new Array());
 	},
 	serialize:function()
 	{

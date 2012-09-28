@@ -16,7 +16,8 @@ enyo.kind({
 	handlers:
 	{
 		onLoadStart:"handleLoadStart",
-		onItemsLoaded:"handleLoadFinish"
+		onItemsLoaded:"handleLoadFinish",
+		onAllItemsChanged:"saveAllItemsToStorage"
 	},
 	create:function()
 	{
@@ -44,6 +45,7 @@ enyo.kind({
 			return guid;
 		},
 		_allItems: [],
+		_allLocations: [],
 		getAllItems:function()
 		{
 			return this._allItems;
@@ -69,6 +71,11 @@ enyo.kind({
 			this.getAllItems()[item.getGuid()] = item;
 			this.saveAllItemsToStorage();
 		},
+		addLocation:function(item)
+		{
+			this.getLocations().push(item);
+			this.saveLocationsToStorage();
+		},
 		saveAllItemsToStorage:function()
 		{
 			var serialized = new Array();
@@ -90,7 +97,26 @@ enyo.kind({
 				}
 				this._allItems = deserializedItems;
 			}
+			var loadedLocations = this.Storage.get("allLocations");
+			if(loadedLocations)
+			{
+				var deserializedLocations = new Array();
+				for (var item in loadedLocations)
+					var dl = ShoppingListManager.Location.deserialize(loadedLocations[item]);
+					deserializedLocations.push(dl);
+				this._allLocations = deserializedLocations;
+			}
+			else
+				this._allLocations.push(enyo.create({kind:"ShoppingListManager.Location", locationName:"Target, Neptune"}));
 			callback();
+		},
+		saveLocationsToStorage:function()
+		{
+			var serialized = new Array();
+			var locations = this.getLocations();
+			for(var l in locations)
+				serialized.push(locations[l].serialize());
+			this.Storage.set("allLocations",serialized);
 		},
 		getItemByGuid:function(itemId)
 		{
@@ -109,6 +135,10 @@ enyo.kind({
 				if(items[itemId].getProductName().toLowerCase() == name.toLowerCase())
 					return items[itemId];
 			return null;
+		},
+		getLocations:function()
+		{
+			return this._allLocations;
 		},
 	}
 });

@@ -6,12 +6,18 @@ enyo.kind({
 		suggestions: [],
 		keyTimer:null,
 	},
+	events:{
+		onShowStorePopup:"",
+		onCheckout:"",
+	},
 	handlers:{
-		onCheckout:"showStorePopup",
+		onShowStorePopup:"showStorePopup",
 		onLocationCancel:"hideStorePopup",
 		onCartChanged:"cartChanged",
 		onItemsChanged:"itemsChanged",
 		onItemsLoaded:"updateProgress",
+		onCommitCheckout:"commitCheckout",
+		onCancelCheckout:"cancelCheckout"
 	},
 	components:[
 		{kind:"FittableRows", fit:true, classes:"enyo-fit",  components:[
@@ -30,12 +36,8 @@ enyo.kind({
 			]},
 			{name:"DesiredItemsList", kind:"ShoppingListManager.ShoppingList", canAdd:true, canDelete:true, fit:true},
 			{kind:"FittableColumns", classes:"onyx-toolbar onyx-toolbar-inline", components:[
-				{fit:true, components:[
-					{name:"Progress", kind:onyx.ProgressBar, animateStripes:false, showStripes:false },
-				]},
-				{kind:onyx.TooltipDecorator, components:[
-					{kind:onyx.Button, content:"Check out", ontap:"doCheckout", classes:"onyx-blue"},
-					{kind:onyx.Tooltip, content:"Remove items in cart from list"},
+				{name:"Progress", fit:true, kind:onyx.ProgressButton, ontap:"doShowStorePopup", animateStripes:false, showStripes:false, components:[
+					{content:"Check out", style:"float:right"},
 				]},
 			]},
 		]},
@@ -43,7 +45,6 @@ enyo.kind({
 			name:"StorePopup",
 			kind:"onyx.Popup",
 			centered:true,
-			autoDismiss:false,
 			modal:true,
 			scrim:true,
 			floating:true,
@@ -59,9 +60,14 @@ enyo.kind({
 		this.inherited(arguments);
 		this.$.NewItem.focus();
 	},
-	doCheckout:function()
+	commitCheckout:function()
 	{
 		this.waterfall("onCheckout");
+		this.$.StorePopup.hide();
+	},
+	cancelCheckout:function()
+	{
+		this.$.StorePopup.hide();
 	},
 	updateProgress:function()
 	{
@@ -75,20 +81,6 @@ enyo.kind({
 	itemsChanged:function()
 	{
 		this.updateProgress();
-	},
-	createSampleData:function()
-	{
-		var itemNames = ["Cereal", "Bananas", "Milk", "Eggs", "Butter", "Bread", "Hamburgers", "Orange Juice", "Cheddar Cheese", "Ham"];
-		var desiredItems = [];
-		var createdItems = []
-		for(var i = 0; i < itemNames.length; i++)
-		{
-			createdItems.push(enyo.create({kind:"ShoppingListManager.Product",productName:itemNames[i]}));
-			this.addItem(createdItems[i]);
-			if(Math.random() > 0.5)
-				desiredItems.push(enyo.create({kind:"ShoppingListManager.DesiredProduct",product:createdItems[i]}));
-		}
-		this.$.DesiredItemsList.setItems(desiredItems);
 	},
 	create:function()
 	{
@@ -169,11 +161,12 @@ enyo.kind({
 		{
 			unavailableItems.push({
 				product: itemsNotInCart[key],
-				available:false
+				unavailable:false
 			});
 		}
 		this.$.StorePopup.show();
 		this.$.CheckoutHelper.setUnavailableItems(unavailableItems);
+		this.$.CheckoutHelper.setInCart(this.$.DesiredItemsList.getProductsInCart());
 	},
 	hideStorePopup:function(inSender,inEvent)
 	{

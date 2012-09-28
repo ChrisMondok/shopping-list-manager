@@ -101,6 +101,14 @@ enyo.kind({
 				checkedItems.push(this.items[i]);
 		return checkedItems;
 	},
+	getProductsInCart:function()
+	{
+		var items = this.getItemsInCart();
+		var products = new Array();
+		for(var i=0; i < items.length; i++)
+			products.push(items[i].getProduct());
+		return products;
+	},
 	addItem:function(newItem)
 	{
 		var name = newItem.getProductName();
@@ -108,7 +116,7 @@ enyo.kind({
 		var desiredItem = null;
 		if(!item)
 		{
-			item = enyo.create({kind:"ShoppingListManager.DesiredProduct", product:newItem});
+			item = this.createComponent({kind:"ShoppingListManager.DesiredProduct", product:newItem});
 			this.items.unshift(item);
 			this.bubble("onItemsChanged");
 		}
@@ -135,8 +143,6 @@ enyo.kind({
 	},
 	checkout:function()
 	{
-		console.log("I'd remove some items here");
-		return;
 		var cart = this.getItemsInCart();
 		for(var item in cart)
 		{
@@ -144,6 +150,7 @@ enyo.kind({
 			this.removeItem(cart[item],true);
 		}
 		this.bubble("onItemsChanged");
+		this.bubble("onAllItemsChanged");
 	},
 	getItemByProduct:function(product)
 	{

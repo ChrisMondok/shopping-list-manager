@@ -3,21 +3,33 @@ enyo.kind({
 	kind:"FittableRows",
 	classes:"enyo-fit",
 	published:{
-		locations:new Array(),
 		pendingName:"",
 		pendingLocation:"",
 		currentLocation:null,
+		inCart:new Array(),
+		selectedRow:null,
+	},
+	events:{
+		onCommitCheckout:"",
+		onCancelCheckout:"",
+	},
+	handlers:{
+		onItemsLoaded:"locationsChanged",
 	},
 	components:[
 		{name:"Panels", kind:"Panels", fit:true, draggable:false, realtimeFit:true, arrangerKind:"CollapsingArranger", components:[	
-			{kind:"FittableRows", classes:"onyx", components:[
+			{kind:"FittableRows", style:"max-width:320px", classes:"onyx", components:[
+				{kind:"onyx.Toolbar", components:[
+					{content:"Where are you?", style:"font-size:1rem;"},
+				]},
 				{kind:enyo.Scroller, fit:true, touch:true, components:[
 					{name:"storeList", kind:enyo.Repeater, onSetupItem:"setupItem", components:[
 						{kind:onyx.Item, tapHighlight:true,  content:"store", ontap:"pickStore"},
 					]},
 				]},
 				{kind:"onyx.Button", content:"Add a store", classes:"onyx-affirmative rowbutton", ontap:"addStoreTap"},
-					{kind:"onyx.Button", content:"Just check out", classes:"rowbutton", ontap:"cancelTap"},
+				{kind:"onyx.Button", content:"Just check out", classes:"rowbutton", ontap:"doCommitCheckout"},
+				{kind:"onyx.Button", content:"Cancel", classes:"onyx-negative rowbutton", ontap:"doCancelCheckout"},
 			]},
 			{kind:"FittableRows", disabled:true, style:"height:100%;", classes:"onyx", components:[
 				{kind:"onyx.Toolbar", components:[
@@ -25,8 +37,8 @@ enyo.kind({
 				]},
 				{name:"unavailableItemsList", kind:"ShoppingListManager.UnavailableItemList", fit:true},
 				{kind:"onyx.Toolbar", components:[
-					{kind:"onyx.Grabber", ontap:"panelBack"},
-					{kind:"onyx.Button", content:"Select all"},
+					{kind:"onyx.Grabber", ontap:"panelToggle"},
+					{kind:"onyx.Button", content:"Select all", ontap:"selectAll"},
 					{name:"DoneButton", kind:"onyx.Button", content:"Done", disabled:true, classes:"onyx-affirmative" },
 				]},
 			]},
@@ -64,41 +76,6 @@ enyo.kind({
 			]
 		},
 	],
-	create:function()
-	{
-		this.inherited(arguments);
-		this.loadLocations();
-		this.createSampleLocations();
-	},
-	createSampleLocations:function()
-	{
-		var samples = new Array();
-		samples.push(this.createComponent({kind:"ShoppingListManager.Location", locationName:"Target, Neptune", latitude:40.2283, longitude:-74.0456}));
-		this.setLocations(samples);
-	},
-	saveLocations:function()
-	{
-		var serialized = new Array();
-		var items = this.getItems();
-		for (var item in items)
-			serialized.push(items[item].serialize());
-		ShoppingListManager.Storage.set("locations");
-	},
-	loadLocations:function()
-	{
-		var loadedItems = ShoppingListManager.Storage.get("locations");
-		if(loadedItems)
-		{
-			var deserializedItems = new Array();
-			for (var item in loadedItems)
-			{
-				var di = ShoppingListManager.Location.deserialize(loadedItems[item])
-				di.setOwner(this);
-				deserializedItems.push(di);
-			}
-			this.setLocations(deserializedItems);
-		}
-	},
 	setUnavailableItems:function(items)
 	{
 		this.$.unavailableItemsList.setItems(items);
@@ -120,34 +97,34 @@ enyo.kind({
 		this.setPendingName(this.$.storeNameInput.getValue());
 		this.$.AddStorePopup.hide();
 	},
-	cancelTap:function(inSender,inEvent)
-	{
-		this.bubble("onLocationCancel");
-	},
 	focusInput:function()
 	{
 		this.$.storeNameInput.focus();
 	},
 	locationsChanged:function()
 	{
-		this.$.storeList.setCount(this.getLocations().length);
+		this.$.storeList.setCount(ShoppingListManager.getLocations().length);
 	},
 	setupItem:function(inSender,inEvent)
 	{
 		var index = inEvent.index;
 		var row = inEvent.item;
-		var store = this.getLocations();
-		row.$.item.setContent(store[index].getLocationName());
-		ROW = row;
+		var stores = ShoppingListManager.getLocations();
+		row.$.item.setContent(stores[index].getLocationName());
+		if(stores[index] == this.getCurrentLocation())
+			this.setSelectedRow(row.$.item);
 		return true;
 	},
 	hideAddStorePopup:function()
 	{
 		this.$.AddStorePopup.hide();
 	},
-	panelBack:function()
+	panelToggle:function()
 	{
-		this.$.Panels.previous();
+		if(this.$.Panels.getIndex())
+			this.$.Panels.previous();
+		else
+			this.$.Panels.next();
 	},
 	back:function()
 	{
@@ -168,26 +145,42 @@ enyo.kind({
 	},
 	commitPendingLocation:function()
 	{
-		var locations = this.getLocations();
 		var coords = this.getPendingLocation();
-		locations.push(this.createComponent({kind:"ShoppingListManager.Location", locationName:this.getPendingName(), latitude:coords.latitude, longitude:coords.longitude}));
+		var newLocation = this.createComponent({kind:"ShoppingListManager.Location", locationName:this.getPendingName(), latitude:coords.latitude, longitude:coords.longitude});
+		ShoppingListManager.addLocation(newLocation);
 		this.setPendingLocation(null);
 		this.setPendingName(null);
+		this.setCurrentLocation(newLocation);
 		this.locationsChanged();
 	},
 	pickStore:function(inSender,inEvent)
 	{
-		var stores = this.getLocations();
+		var stores = ShoppingListManager.getLocations();
 		this.setCurrentLocation(stores[inEvent.index]);
+		this.setSelectedRow(inSender);
 	},
 	currentLocationChanged:function()
 	{
 		if(this.getCurrentLocation())
 		{
-			this.$.Panels.setIndex(1);
+			this.$.Panels.setDraggable(true);
 			this.$.DoneButton.setDisabled(false);
+			this.$.Panels.setIndex(1);
 		}
 		else
+		{
+			this.$.Panels.setDraggable(false);
 			this.$.DoneButton.setDisabled(true);
+		}
+	},
+	selectedRowChanged:function(previousRow)
+	{
+		if(previousRow)
+			previousRow.removeClass("selected");
+		this.getSelectedRow().addClass("selected");
+	},
+	selectAll:function()
+	{
+		this.waterfall("onSelectAll");
 	},
 });

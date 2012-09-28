@@ -5,6 +5,9 @@ enyo.kind({
 	published:{
 		items:new Array(),
 	},
+	handlers:{
+		onSelectAll:"selectAll",
+	},
 	components:[
 		{name:"List", kind:enyo.Repeater, fit:true, onSetupItem: "setupItem", components:[
 			{kind:"onyx.Item", tapHighlight:true, components:[
@@ -23,11 +26,19 @@ enyo.kind({
 		var index = inEvent.index;
 		var item = inEvent.item;
 		item.$.ItemName.setContent(this.items[index].product);
-		item.$.Checkbox.setChecked(this.items[index].available);
+		item.$.Checkbox.setChecked(this.items[index].unavailable);
 		return true;
 	},
 	itemsChanged:function()
 	{
 		this.$.List.setCount(this.getItems().length);
+	},
+	selectAll:function()
+	{
+		THIS = this;
+		var items = this.getItems();
+		for(var i in items)
+			items[i].unavailable = true;
+		this.itemsChanged();
 	},
 });

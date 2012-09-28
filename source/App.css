@@ -73,3 +73,9 @@ input
 {
 	-o-animation: highlight 1s ease-in-out 1;
 }
+
+.selected
+{
+	background-color: #C4E3FE;
+	color: black;
+}
