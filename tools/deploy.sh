@@ -43,7 +43,7 @@ EOF
 mkdir -p "$TARGET/lib"
 
 # copy root folder files
-cp "$SOURCE/index.html" "$SOURCE/icon.png" "$TARGET"
+cp "$SOURCE/index.html" "$SOURCE/icon.png" "$SOURCE/appinfo.json" "$TARGET"
 
 # copy assets and build
 cp -r "$SOURCE/assets" "$SOURCE/build" "$TARGET"

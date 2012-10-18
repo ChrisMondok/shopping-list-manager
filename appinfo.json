@@ -3,7 +3,7 @@
 	"version":"1.0.0",
 	"vendor":"Chris Mondok",
 	"type":"web",
-	"main":"debug.html",
+	"main":"index.html",
 	"title":"Shopping List Manager",
 	"uiRevision":2
 }

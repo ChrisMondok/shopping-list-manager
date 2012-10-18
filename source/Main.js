@@ -27,8 +27,8 @@ enyo.kind({
 				]},
 				{kind:onyx.Button, classes:"onyx-affirmative", content:"Add", onclick:"addItem"} 
 			]},
-			{name:"Drawer", kind:"ResizableDrawer", classes:"suggestionsDrawer", open:false, components:[
-				{name:"SuggestionsList", kind:enyo.Repeater, fit:true, onSetupItem: "renderSuggestions", components:[
+			{name:"Drawer", kind:"ResizableDrawer", classes:" recessed", open:false, components:[
+				{name:"SuggestionsList", kind:enyo.Repeater, classes:"suggestionsList", fit:true, onSetupItem: "renderSuggestions", components:[
 					{kind:onyx.Item, onclick:"useSuggestion", components:[
 						{name:"Suggestion"},
 					]},

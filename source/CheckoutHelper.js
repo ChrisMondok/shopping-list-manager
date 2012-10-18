@@ -3,7 +3,6 @@ enyo.kind({
 	kind:"FittableRows",
 	classes:"enyo-fit",
 	published:{
-		pendingName:"",
 		pendingLocation:"",
 		currentLocation:null,
 		selectedRow:null,
@@ -18,7 +17,7 @@ enyo.kind({
 	},
 	components:[
 		{name:"Panels", kind:"Panels", fit:true, draggable:false, realtimeFit:true, arrangerKind:"CollapsingArranger", components:[	
-			{kind:"FittableRows", style:"max-width:320px", classes:"onyx", components:[
+			{kind:"FittableRows", style:"width:320px", classes:"onyx", components:[
 				{kind:"onyx.Toolbar", components:[
 					{content:"Where are you?", style:"font-size:1rem;"},
 				]},
@@ -26,8 +25,18 @@ enyo.kind({
 					{name:"storeList", kind:enyo.Repeater, onSetupItem:"setupItem", components:[
 						{kind:onyx.Item, tapHighlight:true,  content:"store", ontap:"pickStore"},
 					]},
+					{name:"addStoreDrawer", kind:"onyx.Drawer", open:false, components:[
+						{style:"background-color:rgba(0,0,0,0.1)", components:[
+							{kind:"onyx.InputDecorator", style:"width:100%", components:[
+								{name:"storeNameInput", kind:"onyx.Input", style:"width:100%", onchange:"storeNameInputChanged", placeholder:"Store name"},
+							]},
+						]},
+						{name:"getLocationDrawer", kind:"onyx.Drawer", open:false, components:[
+							{content:"Getting location..."},
+						]},
+					]},
+					{name:"addStoreButton", kind:onyx.Item, content:"Add a store", ontap:"addStoreTap"},
 				]},
-				{kind:"onyx.Button", content:"Add a store", classes:"onyx-affirmative rowbutton", ontap:"addStoreTap"},
 				{kind:"onyx.Button", content:"Just check out", classes:"rowbutton", ontap:"doCommitCheckout"},
 				{kind:"onyx.Button", content:"Cancel", classes:"onyx-negative rowbutton", ontap:"doCancelCheckout"},
 			]},
@@ -43,38 +52,6 @@ enyo.kind({
 				]},
 			]},
 		]},
-		{
-			name:"AddStorePopup",
-			kind:"onyx.Popup",
-			scrim:true,
-			centered:true,
-			modal:true,
-			floating:true,
-			onShow:"focusInput",
-			style:"text-align:center",
-			components:[
-				{kind:"onyx.InputDecorator", components:[
-					{name:"storeNameInput", kind:"onyx.Input"},
-				]},
-				{tag:"br"},
-				{kind:"onyx.Button", classes:"onyx-affirmative", content:"Add", ontap:"addStoreName"},
-				{kind:"onyx.Button", content:"Cancel", ontap:"hideAddStorePopup"},
-			],
-		},
-		{
-			name:"WaitingForLocationPopup",
-			kind:"onyx.Popup",
-			scrim:false,
-			centered:true,
-			modal:false,
-			floating:true,
-			style:"text-align:center;",
-			components:[
-				{kind:"onyx.Spinner"},
-				{tag:"br"},
-				{content:"Getting current location"}
-			]
-		},
 	],
 	listChanged:function()
 	{
@@ -91,21 +68,25 @@ enyo.kind({
 	},
 	gotLocation:function(loc)
 	{
-		this.$.WaitingForLocationPopup.hide();
 		var coords = loc.coords;
 		this.setPendingLocation(coords);
+		this.$.getLocationDrawer.setOpen(false);
 	},
 	addStoreTap:function(inSender,inEvent)
 	{
-		this.$.WaitingForLocationPopup.show();
-		this.$.AddStorePopup.show();
-		navigator.geolocation.getCurrentPosition(this.gotLocation.bind(this));
+		if(this.$.addStoreDrawer.getOpen())
+		{
+			this.$.addStoreDrawer.setOpen(false);
+			this.$.addStoreButton.show();
+		}
+		else
+		{
+			this.$.addStoreButton.hide();
+			this.$.addStoreDrawer.setOpen(true);
+			this.$.getLocationDrawer.setOpen(true);
+			navigator.geolocation.getCurrentPosition(this.gotLocation.bind(this));
+		}
 	}, 
-	addStoreName:function(inSender,inEvent)
-	{
-		this.setPendingName(this.$.storeNameInput.getValue());
-		this.$.AddStorePopup.hide();
-	},
 	focusInput:function()
 	{
 		this.$.storeNameInput.focus();
@@ -133,7 +114,10 @@ enyo.kind({
 		if(this.$.Panels.getIndex())
 			this.$.Panels.previous();
 		else
-			this.$.Panels.next();
+		{
+			if(this.getCurrentLocation())
+				this.$.Panels.next();
+		}
 	},
 	back:function()
 	{
@@ -142,31 +126,46 @@ enyo.kind({
 		else
 			this.bubble("onLocationCancel");
 	},
-	pendingNameChanged:function()
+	storeNameInputChanged:function()
 	{
-		if(this.getPendingName() && this.getPendingLocation())
-			this.commitPendingLocation();
+		this.tryCommitNewStore();
 	},
 	pendingLocationChanged:function()
 	{
-		if(this.getPendingName() && this.getPendingLocation())
-			this.commitPendingLocation();
+		this.tryCommitNewStore();
 	},
-	commitPendingLocation:function()
+	tryCommitNewStore:function()
 	{
 		var coords = this.getPendingLocation();
-		var newLocation = this.createComponent({kind:"ShoppingListManager.Location", locationName:this.getPendingName(), latitude:coords.latitude, longitude:coords.longitude});
-		ShoppingListManager.addLocation(newLocation);
-		this.setPendingLocation(null);
-		this.setPendingName(null);
-		this.setCurrentLocation(newLocation);
-		this.locationsChanged();
+		var name = this.$.storeNameInput.getValue();
+		if(coords && name)
+		{
+			var newLocation = this.createComponent(
+				{
+					kind:"ShoppingListManager.Location",
+					locationName:name,
+					latitude:coords.latitude,
+					longitude:coords.longitude
+				});
+			ShoppingListManager.addLocation(newLocation);
+			this.setPendingLocation(null);
+			this.$.storeNameInput.setValue("");
+			this.setCurrentLocation(newLocation);
+			this.locationsChanged();
+			this.$.addStoreButton.show();
+			this.$.addStoreDrawer.setOpen(false);
+		}
 	},
 	pickStore:function(inSender,inEvent)
 	{
 		var stores = ShoppingListManager.getLocations();
-		this.setCurrentLocation(stores[inEvent.index]);
-		this.setSelectedRow(inSender);
+		if(stores[inEvent.index] == this.getCurrentLocation())
+			this.currentLocationChanged();
+		else
+		{
+			this.setCurrentLocation(stores[inEvent.index]);
+			this.setSelectedRow(inSender);
+		}
 	},
 	currentLocationChanged:function()
 	{

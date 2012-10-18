@@ -1,17 +1,9 @@
-/*
-	Put anything you reference with "url()" in ../assets/
-	This way, you can minify your application, and just remove the "source" folder for production
-*/
-#app {
-	background-color: #EAEAEA;
-}
-
 @keyframes highlight {
   from {
 	background-color: #C4E3FE;
   }
   to {
-	background-color: #EAEAEA;
+	background-color: transparent;
   }
 }
 @-o-keyframes highlight {
@@ -19,7 +11,7 @@
 	background-color: #C4E3FE;
   }
   to {
-	background-color: #EAEAEA;
+	background-color: transparent;
   }
 }
 @-webkit-keyframes highlight {
@@ -27,7 +19,7 @@
 	background-color: #C4E3FE;
   }
   to {
-	background-color: #EAEAEA;
+	background-color: transparent;
   }
 }
 @-moz-keyframes highlight {
@@ -35,7 +27,7 @@
 	background-color: #C4E3FE;
   }
   to {
-	background-color: #EAEAEA;
+	background-color: transparent;
   }
 }
 
@@ -54,10 +46,11 @@
 	color:#0000FF;
 }
 
-.suggestionsDrawer
+.suggestionsList
 {
-	background-color:rgba(0,0,0,0.25);
-	margin:0ex 0.6em;
+	margin:0em 0.6em;
+	background:white;
+	border-radius: 0em 0em 1em 1em;
 }
 
 input
