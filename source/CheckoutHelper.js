@@ -45,9 +45,10 @@ enyo.kind({
 					{content:"Which items are not sold here?", style:"font-size:1rem;"},
 				]},
 				{name:"unavailableItemsList", kind:"ShoppingListManager.UnavailableItemList", fit:true},
-				{kind:"onyx.Toolbar", components:[
+				{kind:"onyx.MoreToolbar", components:[
 					{kind:"onyx.Grabber", ontap:"panelToggle"},
-					{kind:"onyx.Button", content:"Select all", ontap:"selectAll"},
+					{fit:true},
+					{kind:"onyx.Button", content:"Select all", ontap:"selectAll", showing:false},
 					{name:"DoneButton", kind:"onyx.Button", content:"Check out here", disabled:true, classes:"onyx-affirmative", ontap:"processCheckout" },
 				]},
 			]},
