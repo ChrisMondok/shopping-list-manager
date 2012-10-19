@@ -8,10 +8,10 @@ enyo.kind({
 		label:"",
 	},
 	components:[
-		{classes:"divider-line"},
+		{classes:"divider-line left"},
 		{name:"Letter", showing:false, classes:"divider-letter"},
 		{name:"Label", showing:false, classes:"divider-label"},
-		{classes:"divider-line", fit:true},
+		{classes:"divider-line right", fit:true},
 	],
 	letterChanged:function()
 	{

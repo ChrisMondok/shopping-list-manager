@@ -21,11 +21,23 @@ enyo.kind({
 	},
 	components:[
 		{kind:"FittableRows", fit:true, classes:"enyo-fit",  components:[
-			{kind:"FittableColumns", classes:"onyx-toolbar onyx-toolbar-inline", components:[
+			{kind:"onyx.MoreToolbar", components:[
 				{kind:onyx.InputDecorator, fit:true, components:[
 					{kind:onyx.Input, name:"NewItem", placeholder:"New item", oninput:"filterInputChanged", fit:true},
 				]},
-				{kind:onyx.Button, classes:"onyx-affirmative", content:"Add", onclick:"addItem"} 
+				{kind:onyx.Button, classes:"onyx-affirmative", content:"Add", onclick:"addItem"} ,
+				{kind:"onyx.MenuDecorator", components:[
+					{content:"Menu"},
+					{kind:"onyx.Menu", components:[
+						{content:"Set location"},
+						{name:"sortDrawer", kind:"onyx.SubMenu", content:"Sort by", open:false, components:[
+							{kind:"onyx.MenuItem", content:"Default"},
+							{kind:"onyx.MenuItem", content:"Name"},
+							{kind:"onyx.MenuItem", content:"Status"},
+							{kind:"onyx.MenuItem", content:"Last purchased"},
+						]},
+					]},
+				]},
 			]},
 			{name:"Drawer", kind:"ResizableDrawer", classes:" recessed", open:false, components:[
 				{name:"SuggestionsList", kind:enyo.Repeater, classes:"suggestionsList", fit:true, onSetupItem: "renderSuggestions", components:[
@@ -36,15 +48,6 @@ enyo.kind({
 			]},
 			{name:"DesiredItemsList", kind:"ShoppingListManager.ShoppingList", canAdd:true, canDelete:true, classes:"recessed", fit:true},
 			{kind:"onyx.MoreToolbar", components:[
-				{kind:"onyx.PickerDecorator", onSelect:"sortMethodSelected", components:[
-					{kind:"onyx.Button", style:"width:17ex", content:"Sort"},
-					{kind:"onyx.Picker", components:[
-						{content:"Added to list"},
-						{content:"Name"},
-						{content:"Status"},
-						{content:"Last purchased"},
-					]},
-				]},
 				{name:"Progress", fit:true, kind:"ShoppingListManager.CheckoutButton", ontap:"doShowStorePopup", animateStripes:false, showStripes:false, components:[
 					{content:"Check out", style:"float:right"},
 				]},
@@ -66,14 +69,14 @@ enyo.kind({
 			]
 		},
 	],
-	sortMethodSelected:function(inSender,inEvent)
-	{
-		this.$.DesiredItemsList.setSortMethod(inEvent.selected.getContent())
-	},
 	rendered:function()
 	{
 		this.inherited(arguments);
-		this.$.NewItem.focus();
+		window.MAIN = this;
+	},
+	sortMethodSelected:function(inSender,inEvent)
+	{
+		this.$.DesiredItemsList.setSortMethod(inEvent.selected.getContent())
 	},
 	commitCheckout:function()
 	{

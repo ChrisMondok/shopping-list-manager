@@ -14,5 +14,6 @@ enyo.depends(
 	"CheckoutHelper.js",
 	"UnavailableItemList.js",
 	"CheckoutButton.js",
-	"Divider.js"
+	"Divider.js",
+	"SubMenu.js"
 );

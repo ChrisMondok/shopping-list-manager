@@ -5,7 +5,7 @@ enyo.kind({
 	sortedItems:new Array(),
 	published:{
 		items:new Array(),
-		sortMethod:"Added to list",
+		sortMethod:"None",
 	},
 	events:{
 		onCheckout:"",
@@ -171,7 +171,7 @@ enyo.kind({
 	{
 		this.saveList();
 		if(this.getSortMethod() == "Status")
-			this.sortItems();
+			enyo.job("sortItems",enyo.bind(this,"sortItems"),1000);
 	},
 	getItemsInCart:function()
 	{
