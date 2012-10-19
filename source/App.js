@@ -106,8 +106,6 @@ enyo.kind({
 					deserializedLocations.push(dl);
 				this._allLocations = deserializedLocations;
 			}
-			else
-				this._allLocations.push(enyo.create({kind:"ShoppingListManager.Location", locationName:"Target, Neptune"}));
 			callback();
 		},
 		saveLocationsToStorage:function()
