@@ -28,9 +28,9 @@ enyo.kind({
 				{kind:onyx.Button, classes:"onyx-affirmative", content:"Add", onclick:"addItem"} ,
 				{kind:"onyx.MenuDecorator", components:[
 					{content:"Menu"},
-					{kind:"onyx.Menu", components:[
-						{content:"Set location"},
-						{name:"sortDrawer", kind:"onyx.SubMenu", content:"Sort by", open:false, components:[
+					{kind:"onyx.Menu", onSelect:"menuItemSelected", onHide:"menuHidden", components:[
+						{content:"Set location..."},
+						{name:"sortSubMenu", kind:"onyx.SubMenu", content:"Sort by", open:false, components:[
 							{kind:"onyx.MenuItem", content:"Default"},
 							{kind:"onyx.MenuItem", content:"Name"},
 							{kind:"onyx.MenuItem", content:"Status"},
@@ -74,9 +74,21 @@ enyo.kind({
 		this.inherited(arguments);
 		window.MAIN = this;
 	},
-	sortMethodSelected:function(inSender,inEvent)
+	menuItemSelected:function(inSender,inEvent)
 	{
-		this.$.DesiredItemsList.setSortMethod(inEvent.selected.getContent())
+		switch(inEvent.selected.getContent())
+		{
+		case "Default":
+		case "Name":
+		case "Status":
+		case "Last purchased":
+			this.$.DesiredItemsList.setSortMethod(inEvent.selected.getContent());
+			break;
+		}
+	},
+	menuHidden:function()
+	{
+		this.$.sortSubMenu.setOpen(false);
 	},
 	commitCheckout:function()
 	{
