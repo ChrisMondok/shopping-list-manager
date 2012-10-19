@@ -13,5 +13,6 @@ enyo.depends(
 	"Location.js",
 	"CheckoutHelper.js",
 	"UnavailableItemList.js",
-	"CheckoutButton.js"
+	"CheckoutButton.js",
+	"Divider.js"
 );

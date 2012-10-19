@@ -35,8 +35,19 @@ enyo.kind({
 				]},
 			]},
 			{name:"DesiredItemsList", kind:"ShoppingListManager.ShoppingList", canAdd:true, canDelete:true, classes:"recessed", fit:true},
-			{name:"Progress", kind:"ShoppingListManager.CheckoutButton", ontap:"doShowStorePopup", animateStripes:false, showStripes:false, components:[
-				{content:"Check out", style:"float:right"},
+			{kind:"onyx.MoreToolbar", components:[
+				{kind:"onyx.PickerDecorator", onSelect:"sortMethodSelected", components:[
+					{kind:"onyx.Button", style:"width:17ex", content:"Sort"},
+					{kind:"onyx.Picker", components:[
+						{content:"Added to list"},
+						{content:"Name"},
+						{content:"Status"},
+						{content:"Last purchased"},
+					]},
+				]},
+				{name:"Progress", fit:true, kind:"ShoppingListManager.CheckoutButton", ontap:"doShowStorePopup", animateStripes:false, showStripes:false, components:[
+					{content:"Check out", style:"float:right"},
+				]},
 			]},
 		]},
 		{
@@ -55,6 +66,10 @@ enyo.kind({
 			]
 		},
 	],
+	sortMethodSelected:function(inSender,inEvent)
+	{
+		this.$.DesiredItemsList.setSortMethod(inEvent.selected.getContent())
+	},
 	rendered:function()
 	{
 		this.inherited(arguments);

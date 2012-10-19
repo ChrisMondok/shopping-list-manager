@@ -24,6 +24,10 @@ enyo.kind({
 		deserialize:function(serialized)
 		{
 			serialized.kind = serialized.kind || "ShoppingListManager.Product";
+			if(serialized.lastPurchased)
+				serialized.lastPurchased = new Date(serialized.lastPurchased);
+			else
+				serialized.lastPurchased = null;
 			return enyo.create(serialized);
 		},
 	},

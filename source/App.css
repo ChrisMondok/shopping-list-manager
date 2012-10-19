@@ -107,3 +107,35 @@ input
 	border-width:0px 4px 0px 4px;
 	background-color:rgba(0,0,0,0.1);
 }
+
+.divider .divider-letter, .divider .divider-line, .divider .divider-label
+{
+	background-color:#F79A42;
+	border-top:2px solid rgba(0,0,0,0.2);
+	border-bottom:2px solid rgba(255,255,255,0.5);
+	vertical-align:middle;
+	position:relative;
+}
+.divider-label, .divider-letter
+{
+	line-height:1.25em;
+	text-align:center;
+	border-radius:0.75em;
+	margin:0em -0.5em 0em -0.5em;
+	padding-left:0.5em;
+	padding-right:0.5em;
+	z-index:2;
+	height:1.5em !important;
+}
+.divider-letter
+{
+	width:1.5em;
+	padding:0em;
+}
+
+.divider-line
+{
+	width:2em;
+	height:8px !important;
+	z-index:1;
+}
