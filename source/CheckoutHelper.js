@@ -198,6 +198,6 @@ enyo.kind({
 			return;
 		//mark unavailable items
 		//mark available items
-		this.doCancelCheckout();
+		this.doCommitCheckout();
 	},
 });

@@ -25,7 +25,7 @@ enyo.kind({
 				{kind:onyx.InputDecorator, fit:true, components:[
 					{kind:onyx.Input, name:"NewItem", placeholder:"New item", oninput:"filterInputChanged", fit:true},
 				]},
-				{kind:onyx.Button, classes:"onyx-affirmative", content:"Add", onclick:"addItem"} ,
+				{kind:onyx.Button, content:"Add", onclick:"addItem"} ,
 				{kind:"onyx.MenuDecorator", components:[
 					{content:"Menu"},
 					{kind:"onyx.Menu", onSelect:"menuItemSelected", onHide:"menuHidden", components:[

@@ -160,6 +160,11 @@ input
 {
 	border-top:1px solid rgba(0,0,0,0.6);
 	border-bottom:1px solid rgba(255,255,255,0.2);
-	padding-left:0.5em;
+	text-indent:0.5em;
 	background-color:rgba(0,0,0,0.2);
+}
+
+.onyx-menu-item:hover
+{
+	background:rgba(247,154,66,0.3);
 }

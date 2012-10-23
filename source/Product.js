@@ -16,7 +16,7 @@ enyo.kind({
 			kind:this.kind,
 			guid:this.getGuid(),
 			productName:this.getProductName(),
-			lastPurchased:this.getLastPurchased()
+			lastPurchased:this.getLastPurchased()?this.getLastPurchased().toString():null
 		};
 	},
 	statics:
