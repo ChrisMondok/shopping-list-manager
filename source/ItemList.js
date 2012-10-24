@@ -1,7 +1,6 @@
 enyo.kind({
 	name:"ShoppingListManager.ShoppingList",
 	kind:"Scroller",
-	touch:true,
 	sortedItems:new Array(),
 	published:{
 		items:new Array(),
