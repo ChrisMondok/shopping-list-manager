@@ -19,6 +19,10 @@ enyo.kind({
 		onCommitCheckout:"commitCheckout",
 		onCancelCheckout:"cancelCheckout"
 	},
+	relaunch:function()
+	{
+		console.log("RELAUNCH");
+	},
 	components:[
 		{kind:"FittableRows", fit:true, classes:"enyo-fit",  components:[
 			{kind:"onyx.MoreToolbar", components:[

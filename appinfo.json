@@ -5,5 +5,12 @@
 	"type":"web",
 	"main":"index.html",
 	"title":"Shopping List Manager",
-	"uiRevision":2
+	"uiRevision":2,
+	"universalSearch" : {
+		"action":{
+			"displayName" : "Add to shopping list",
+			"url" : "com.chrismondok.shoppinglistmanager",
+			"launchParam" : "newItem"
+		}
+	}
 }
